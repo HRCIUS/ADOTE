@@ -37,7 +37,7 @@ def cadastro(request):
             return render(request, 'cadastro.html')
 def logar(request):
     if request.user.is_authenticated:
-        return redirect("divulgar/novo_pet")
+        return redirect("/divulgar/novo_pet")
 
     if request.method == 'GET':
         return render(request, 'login.html')
