@@ -3,6 +3,10 @@ from django.contrib.auth.decorators import login_required
 from .models import Tag, Raca, Pet
 from django.contrib import messages
 from django.contrib.messages import constants
+from adotar.models import PedidoAdocao
+from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 @login_required
 def novo_pet(request):
@@ -57,3 +61,65 @@ def remover_pet(request, id):
     pet.delete()
     messages.add_message(request, constants.SUCCESS, 'Removido com sucesso.')
     return redirect('/divulgar/seus_pets')
+
+@login_required
+def ver_pet(request, id):
+    if request.method == "GET":
+        pet = Pet.objects.get(id = id)
+        return render(request, 'ver_pet.html', {'pet': pet})
+
+@login_required
+def ver_pedido_adocao(request):
+    if request.method == "GET":
+        pedidos = PedidoAdocao.objects.filter(usuario=request.user).filter(status="AG")
+        return render(request, 'ver_pedido_adocao.html', {'pedidos': pedidos})
+
+@login_required
+def processa_pedido_adocao(request, id_pedido):
+    status = request.GET.get('status')
+    pedido = PedidoAdocao.objects.get(id=id_pedido)
+    pet = Pet.objects.get(id=pedido.pet_id)
+    if status == "A":
+        pedido.status = 'AP'
+        string = '''Olá, sua adoção foi aprovada. ...'''
+        pet.status = 'A'
+    elif status == "R":
+        string = '''Olá, sua adoção foi recusada. ...'''
+        pedido.status = 'R'
+        pet.status = 'A'
+
+    pet.save()
+    pedido.save()
+
+    
+    print(pedido.usuario.email)
+    email = send_mail(
+        'Sua adoção foi processada',
+        string,
+        'seuemail@gmail.com',
+        [pedido.usuario.email,],
+    )
+    
+    messages.add_message(request, constants.SUCCESS, 'Pedido de adoção processado com sucesso')
+    return redirect('/divulgar/ver_pedido_adocao')
+
+@login_required
+def dashboard(request):
+    if request.method == "GET":
+        return render(request, 'dashboard.html')
+
+@login_required
+@csrf_exempt
+def api_adocoes_por_raca(request):
+    racas = Raca.objects.all()
+
+    qtd_adocoes = []
+    for raca in racas:
+        adocoes = PedidoAdocao.objects.filter(pet__raca=raca).count()
+        qtd_adocoes.append(adocoes)
+
+    racas = [raca.raca for raca in racas]
+    data = {'qtd_adocoes': qtd_adocoes,
+            'labels': racas}
+
+    return JsonResponse(data)

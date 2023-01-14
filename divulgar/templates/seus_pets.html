@@ -17,8 +17,26 @@
                 <div class="col-md-2 bg-side sidebar">
                     <h2>ADO.TE</h2>
                     <hr>
-                    
-                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                          <a class="nav-link text-white" href="{% url 'dashboard' %}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'ver_pedido_adocao' %}" class="nav-link text-white">Pedidos de adoção para você</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'seus_pets' %}" class="nav-link text-white">Seus pets</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'listar_pets' %}" class="nav-link text-white">Pets para adoção</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'novo_pet' %}" class="nav-link text-white">Cadastrar pet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'sair' %}" class="nav-link text-danger">Sair</a>
+                        </li>
+                    </ul>
                 </div>
 
                 <div class="col-md">
